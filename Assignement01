@@ -1,1 +1,91 @@
+package dao;
+
+import java.sql.*;
+import java.util.*;
+import model.Event;
+
+public class EventDAO {
+    private Connection con;
+
+    public EventDAO() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost/event_db", "root", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Event> getAllEvents() {
+        List<Event> list = new ArrayList<>();
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM event_space");
+            while (rs.next()) {
+                Event e = new Event();
+                e.setId(rs.getInt("id"));
+                e.setName(rs.getString("name"));
+                e.setLocation(rs.getString("location"));
+                e.setCapacity(rs.getInt("capacity"));
+                list.add(e);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return list;
+    }
+
+    public void addEvent(Event e) {
+        try {
+            PreparedStatement ps = con.prepareStatement("INSERT INTO event_space(name, location, capacity) VALUES (?, ?, ?)");
+            ps.setString(1, e.getName());
+            ps.setString(2, e.getLocation());
+            ps.setInt(3, e.getCapacity());
+            ps.executeUpdate();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void updateEvent(Event e) {
+        try {
+            PreparedStatement ps = con.prepareStatement("UPDATE event_space SET name=?, location=?, capacity=? WHERE id=?");
+            ps.setString(1, e.getName());
+            ps.setString(2, e.getLocation());
+            ps.setInt(3, e.getCapacity());
+            ps.setInt(4, e.getId());
+            ps.executeUpdate();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public Event getEventById(int id) {
+        Event e = new Event();
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM event_space WHERE id=?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                e.setId(rs.getInt("id"));
+                e.setName(rs.getString("name"));
+                e.setLocation(rs.getString("location"));
+                e.setCapacity(rs.getInt("capacity"));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return e;
+    }
+
+    public void deleteEvent(int id) {
+        try {
+            CallableStatement cs = con.prepareCall("{ call delete_event(?) }");
+            cs.setInt(1, id);
+            cs.execute();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
 
