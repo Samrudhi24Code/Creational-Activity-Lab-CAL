@@ -1,0 +1,5 @@
+public interface UserRepository extends JpaRepository<User, Long> {}
+public interface EventSpaceRepository extends JpaRepository<EventSpace, Long> {}
+public interface BookingRepository extends JpaRepository<Booking, Long> {
+    List<Booking> findByUserId(Long userId);
+}
